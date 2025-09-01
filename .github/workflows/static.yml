@@ -21,17 +21,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js (14.x or higher)
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
+      # Step 2: Install Node.js using custom script
+      - name: Install Node.js 14.x
+        run: |
+          cd ~
+          curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
+          sudo bash nodesource_setup.sh
+          sudo apt-get install -y nodejs
+          node -v
+          npm -v
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
+          npm install husky@3.1.0 --ignore-scripts
           npm install
-          npx husky install # 确保安装 husky hooks
 
       # Step 4: Build the project
       - name: Build the project
@@ -41,8 +45,8 @@ jobs:
       - name: List files
         run: ls -R
 
-      # Step 6: Verify if docs directory exists
-      - name: Verify docs directory
+      # Step 6: Verify build output directory
+      - name: Verify build directory
         run: |
           if [ ! -d "./docs" ]; then
             echo "Docs directory does not exist!"
@@ -56,7 +60,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs' # 修正为实际静态文件目录 docs
+          path: './docs' # 确保指定正确的静态文件目录
 
       # Step 8: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
