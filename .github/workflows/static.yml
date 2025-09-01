@@ -22,27 +22,22 @@ jobs:
         uses: actions/checkout@v4
 
       # Step 2: Install Node.js 14.18.2
-      - name: Install Node.js 14.18.2
+      - name: Set up Node.js 14.18.2
         run: |
           cd ~
           curl -O https://nodejs.org/dist/v14.18.2/node-v14.18.2-linux-x64.tar.xz
           tar -xf node-v14.18.2-linux-x64.tar.xz
           sudo mv node-v14.18.2-linux-x64 /usr/local/node-v14.18.2
-          echo "export PATH=/usr/local/node-v14.18.2/bin:$PATH" >> $HOME/.bashrc
+          echo "export PATH=/usr/local/node-v14.18.2/bin:$PATH" >> $GITHUB_ENV
           export PATH=/usr/local/node-v14.18.2/bin:$PATH
           node -v
           npm -v
 
-      # Step 3: Downgrade npm to 6.14.15
-      - name: Downgrade npm to 6.14.15
+      # Step 3: Verify Node.js version before installing dependencies
+      - name: Verify Node.js and npm versions
         run: |
-          npm install -g npm@6.14.15
+          node -v
           npm -v
-
-      - name: Set Node.js OpenSSL legacy provider
-        run: |
-          export NODE_OPTIONS=--openssl-legacy-provider
-          echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
 
       # Step 4: Install dependencies
       - name: Install dependencies
@@ -50,15 +45,21 @@ jobs:
           npm install husky@3.1.0 --ignore-scripts
           npm install
 
-      # Step 5: Build the project
+      # Step 5: Verify Node.js version before build
+      - name: Verify Node.js and npm versions before build
+        run: |
+          node -v
+          npm -v
+
+      # Step 6: Build the project
       - name: Build the project
         run: npm run build
 
-      # Step 6: Debug: List files to verify build output
+      # Step 7: Debug: List files to verify build output
       - name: List files
         run: ls -R
 
-      # Step 7: Verify build output directory
+      # Step 8: Verify build output directory
       - name: Verify build directory
         run: |
           if [ ! -d "./docs" ]; then
@@ -66,16 +67,16 @@ jobs:
             exit 1
           fi
 
-      # Step 8: Upload static files for GitHub Pages
+      # Step 9: Upload static files for GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs' # 确保指定正确的静态文件目录
+          path: './docs'
 
-      # Step 9: Deploy to GitHub Pages
+      # Step 10: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
