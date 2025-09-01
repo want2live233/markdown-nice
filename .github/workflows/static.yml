@@ -39,6 +39,11 @@ jobs:
           npm install -g npm@6.14.15
           npm -v
 
+      - name: Set Node.js OpenSSL legacy provider
+        run: |
+          export NODE_OPTIONS=--openssl-legacy-provider
+          echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+
       # Step 4: Install dependencies
       - name: Install dependencies
         run: |
