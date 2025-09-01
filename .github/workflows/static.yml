@@ -21,41 +21,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Step 2: Install Node.js 14.18.2
-      - name: Set up Node.js 14.18.2
-        run: |
-          cd ~
-          curl -O https://nodejs.org/dist/v14.18.2/node-v14.18.2-linux-x64.tar.xz
-          tar -xf node-v14.18.2-linux-x64.tar.xz
-          sudo mv node-v14.18.2-linux-x64 /usr/local/node-v14.18.2
-          echo "export PATH=/usr/local/node-v14.18.2/bin:$PATH" >> $GITHUB_ENV
-          export PATH=/usr/local/node-v14.18.2/bin:$PATH
-          node -v
-          npm -v
+      # Step 2: Set up Node.js 14.18.2
+      - name: Set up Node.js 14.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.18.2
+          cache: 'npm'
 
-      # Step 3: Verify Node.js version before installing dependencies
+      # Step 3: Verify Node.js and npm versions
       - name: Verify Node.js and npm versions
         run: |
           node -v
           npm -v
 
-      # Step 4: Install dependencies
+      # Step 4: Set OpenSSL legacy provider
+      - name: Set OpenSSL legacy provider
+        run: |
+          export NODE_OPTIONS=--openssl-legacy-provider
+          echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+
+      # Step 5: Install dependencies
       - name: Install dependencies with legacy-peer-deps
         run: |
           npm install husky@3.1.0 --ignore-scripts --legacy-peer-deps
           npm install --legacy-peer-deps
 
-      # Step 5: Verify Node.js version before build
-      - name: Verify Node.js and npm versions before build
-        run: |
-          node -v
-          npm -v
-
       # Step 6: Build the project
       - name: Build the project
         run: npm run build
 
-      # Step 7: Debug: List files to verify build output
+      # Step 7: Debugging - List files
       - name: List files
         run: ls -R
 
