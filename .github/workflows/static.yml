@@ -16,7 +16,6 @@ permissions:
   id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -29,15 +28,35 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js (14.x to match your project requirements)
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      # Step 3: Install project dependencies
+      - name: Install dependencies
+        run: npm install
+      
+      # Step 4: Build the project (ensure you have a build script in package.json)
+      - name: Build the project
+        run: npm run build
+
+      # Step 5: Upload static files (e.g., build/ or dist/) as an artifact
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          # Specify the path to your build output directory
+          path: './build' # Replace 'build' with your actual static file output directory if different
+
+      # Step 6: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
